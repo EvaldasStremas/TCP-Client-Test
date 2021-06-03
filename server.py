@@ -3,7 +3,9 @@ import threading
 
 #Variables for holding information about connections
 connections = []
+received_message = []
 total_connections = 0
+
 
 #Client class, new instance created for each connected client
 #Each instance has the socket and address that is associated with items
@@ -29,16 +31,23 @@ class Client(threading.Thread):
         while self.signal:
             try:
                 data = self.socket.recv(32)
+
             except:
                 print("Client " + str(self.address) + " has disconnected")
                 self.signal = False
                 connections.remove(self)
                 break
             if data != "":
-                print("ID " + str(self.id) + ": " + str(data.decode("utf-8")))
+                a = "ID " + str(self.id) + ": " + str(data.decode("utf-8"))
+                text = str(data.decode("utf-8"))
+                print(a)
+
+                received_message.append(text)
+
                 for client in connections:
                     if client.id != self.id:
                         client.socket.sendall(data)
+
 
 #Wait for new connections
 def newConnections(socket):
@@ -50,10 +59,10 @@ def newConnections(socket):
         print("New connection at ID " + str(connections[len(connections) - 1]))
         total_connections += 1
 
-def main():
+def main(host, port):
     #Get host and port
-    host = input("Host: ")
-    port = int(input("Port: "))
+    # host = input("Host: ")
+    # port = int(input("Port: "))
 
     #Create new server socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -64,4 +73,5 @@ def main():
     newConnectionsThread = threading.Thread(target = newConnections, args = (sock,))
     newConnectionsThread.start()
     
-main()
+if __name__ == '__main__':
+    main()
